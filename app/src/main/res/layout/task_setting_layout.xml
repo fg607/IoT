@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/cancel"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:clickable="true"
+            android:background="@drawable/btn_background"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:text="取消"/>
+
+
+        <TextView
+            android:id="@+id/ok"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:clickable="true"
+            android:background="@drawable/btn_background"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:text="确定"/>
+
+    </LinearLayout>
+
+
+    <com.andexert.library.RippleView
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        rv_centered="true">
+    <TextView
+        android:id="@+id/tv_time"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:textSize="60sp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:background="@color/colorPrimaryDark"/>
+    </com.andexert.library.RippleView>
+
+    <GridView
+        android:id="@+id/devices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:gravity="center"
+        android:horizontalSpacing="5dp"
+        android:verticalSpacing="5dp"
+        android:listSelector="@android:color/transparent"
+        android:numColumns="2"
+        android:stretchMode="columnWidth">
+    </GridView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <ToggleButton
+            android:id="@+id/monday"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:background="@drawable/toggle_btn_back"
+            android:textOn="一"
+            android:textOff="一" />
+
+        <ToggleButton
+            android:id="@+id/tuesday"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:background="@drawable/toggle_btn_back"
+            android:textOn="二"
+            android:textOff="二"/>
+
+        <ToggleButton
+            android:id="@+id/wednesday"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:background="@drawable/toggle_btn_back"
+            android:textOn="三"
+            android:textOff="三"/>
+
+        <ToggleButton
+            android:id="@+id/thursday"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:background="@drawable/toggle_btn_back"
+            android:textOn="四"
+            android:textOff="四"/>
+
+        <ToggleButton
+            android:id="@+id/friday"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:background="@drawable/toggle_btn_back"
+            android:textOn="五"
+            android:textOff="五"/>
+
+        <ToggleButton
+            android:id="@+id/saturday"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:background="@drawable/toggle_btn_back"
+            android:textOn="六"
+            android:textOff="六"/>
+
+        <ToggleButton
+            android:id="@+id/sunday"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:background="@drawable/toggle_btn_back"
+            android:textOn="日"
+            android:textOff="日"/>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="3"
+            android:gravity="center"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:text="定时开启"/>
+
+        <CheckBox
+            android:id="@+id/checkbox_on"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="3"
+            android:gravity="center"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:text="定时关闭"/>
+
+        <CheckBox
+            android:id="@+id/checkbox_off"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+</LinearLayout>

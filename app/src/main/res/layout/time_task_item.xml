@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    xmlns:ndroid="http://schemas.android.com/apk/res-auto"
+    android:background="?android:attr/selectableItemBackground">
+
+    <TextView
+        android:id="@+id/device_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:maxLength="4"
+        android:text="设备1"/>
+
+   <TextView
+       android:id="@+id/time"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginLeft="70dp"
+       android:layout_centerVertical="true"
+       android:layout_alignParentLeft="true"
+       android:textSize="20sp"
+       android:textColor="@color/dark"
+       android:text="12:45下午"/>
+
+    <TextView
+        android:id="@+id/valiad_day"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/time"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="10dp"
+        android:textSize="16sp"
+        android:textColor="@color/green"
+        android:text="日一二三四五六"/>
+
+    <ImageView
+        android:id="@+id/switcher"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_centerVertical="true"
+        android:clickable="true"
+        android:layout_alignParentRight="true"/>
+
+    <TextView
+        android:id="@+id/state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@id/switcher"
+        android:layout_marginRight="10dp"
+        android:textSize="16sp"
+        android:textColor="@color/black" />
+
+
+
+</RelativeLayout>
