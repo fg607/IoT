@@ -134,7 +134,7 @@ public class TaskSetFragment extends Fragment implements View.OnClickListener,
     }
 
     private void initSwitchState() {
-        
+
         if(mTimeTask.getSwitchState()){
 
             mOnCheckBox.setChecked(true);
@@ -165,25 +165,25 @@ public class TaskSetFragment extends Fragment implements View.OnClickListener,
             switch (IoTUtils.getDayOfWeek()){
 
                 case 1:
-                    mSundayBtn.setChecked(true);
-                    break;
-                case 2:
                     mMondayBtn.setChecked(true);
                     break;
-                case 3:
+                case 2:
                     mTuesdayBtn.setChecked(true);
                     break;
-                case 4:
+                case 3:
                     mWeddayBtn.setChecked(true);
                     break;
-                case 5:
+                case 4:
                     mThudayBtn.setChecked(true);
                     break;
-                case 6:
+                case 5:
                     mFridayBtn.setChecked(true);
                     break;
-                case 7:
+                case 6:
                     mSatdayBtn.setChecked(true);
+                    break;
+                case 7:
+                    mSundayBtn.setChecked(true);
                     break;
                 default:
                     break;

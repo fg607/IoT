@@ -9,15 +9,15 @@ import java.util.TimeZone;
  */
 public class IoTUtils {
 
-    public static final String[] WEEKDAYS = {"日","一","二","三","四","五","六"};
+    public static final String[] WEEKDAYS = {"一","二","三","四","五","六","日"};
 
-    public static final int SUNDAY = 1 << 6;
-    public static final int MONDAY = 1 << 5;
-    public static final int TUESDAY = 1 << 4;
-    public static final int WEDNESDAY = 1 << 3;
-    public static final int THURSDAY = 1 << 2;
-    public static final int FRIDAY = 1 << 1;
-    public static final int SATURDAY = 1 << 0;
+    public static final int MONDAY = 1 << 6;
+    public static final int TUESDAY = 1 << 5;
+    public static final int WEDNESDAY = 1 << 4;
+    public static final int THURSDAY = 1 << 3;
+    public static final int FRIDAY = 1 << 2;
+    public static final int SATURDAY = 1 << 1;
+    public static final int SUNDAY = 1 << 0;
 
     public static byte[] intToByteArray(int i) {
         byte[] result = new byte[4];
@@ -33,10 +33,23 @@ public class IoTUtils {
 
         Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
-        return c.get(Calendar.DAY_OF_WEEK);
+        int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
+
+        dayOfWeek = dayOfWeek - 1;
+
+        if(dayOfWeek == 0){
+
+            dayOfWeek = 7 ;
+        }
+
+        return  dayOfWeek;
     }
 
 
+    /**
+     * 每天24点更新星期
+     * @return
+     */
     public static long getIntervalStartWeek(){
 
         Date date = new Date(System.currentTimeMillis());
@@ -46,6 +59,17 @@ public class IoTUtils {
         long startOfDay = 24*60*60*1000;
 
         return Math.abs(startOfDay-now);
+    }
+
+    public static void sleep(long interval){
+
+        try {
+
+            Thread.sleep(interval);
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 

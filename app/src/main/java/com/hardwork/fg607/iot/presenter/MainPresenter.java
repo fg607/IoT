@@ -6,6 +6,7 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.hardwork.fg607.iot.model.Device;
 import com.hardwork.fg607.iot.model.TimeTask;
@@ -14,7 +15,12 @@ import com.hardwork.fg607.iot.utils.IoTUtils;
 import com.hardwork.fg607.iot.utils.SocketUtils;
 import com.hardwork.fg607.iot.view.MainView;
 
+import java.util.ArrayDeque;
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by fg607 on 16-7-27.
@@ -35,7 +41,6 @@ public class MainPresenter implements Presenter<MainView> {
     private MainView mView;
     private Context mContext;
 
-
     private SharedPreferences mSharedPreferences;
 
     private WifiManager mWifiManager;
@@ -44,9 +49,9 @@ public class MainPresenter implements Presenter<MainView> {
 
     private String mUrl = null;
 
-    private long mLastPostMills=0;
-
     private List<Device> mDeviceList;
+
+    private LinkedList<Runnable> mTaskQueue = new LinkedList<>();
 
     public MainPresenter(final Context context){
 
@@ -55,6 +60,31 @@ public class MainPresenter implements Presenter<MainView> {
         mSharedPreferences = context.getSharedPreferences("config",context.MODE_PRIVATE);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 
+    }
+
+    public void startTaskLoops(){
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                while (true){
+
+                    synchronized (mTaskQueue) {
+                        if (mTaskQueue.size() > 0) {
+
+                            Runnable task = mTaskQueue.removeFirst();
+
+                            if (task != null) {
+                                task.run();
+                            }
+                        }
+                    }
+                    //避免频繁访问芯片服务器造成堵塞
+                    IoTUtils.sleep(1000);
+                }
+            }
+        }).start();
     }
 
     @Override
@@ -88,6 +118,8 @@ public class MainPresenter implements Presenter<MainView> {
                 }
             }
         };
+
+        startTaskLoops();
     }
 
 
@@ -107,59 +139,46 @@ public class MainPresenter implements Presenter<MainView> {
 
     public void switchOn(final Device device){
 
-        new Thread(new Runnable() {
+        Runnable task = new Runnable() {
             @Override
             public void run() {
 
                 if(mUrl!=null){
 
-                    //避免频繁访问服务器，造成阻塞
-                    if(System.currentTimeMillis()-mLastPostMills<1000){
-
-                        try {
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-
-                        }
-                    }
-
                     HttpUtil.doPost(mUrl + POWER_ON, "deviceId="+device.getDeviceId()+"&");
-
-                    mLastPostMills = System.currentTimeMillis();
 
                 }
             }
 
-        }).start();
+        };
+
+        synchronized (mTaskQueue) {
+
+            mTaskQueue.addLast(task);
+        }
 
 
     }
 
     public void switchOff(final Device device){
 
-        new Thread(new Runnable() {
+        Runnable task =  new Runnable() {
             @Override
             public void run() {
 
                 if (mUrl != null) {
 
-                    if(System.currentTimeMillis()-mLastPostMills<1000){
-
-                        try {
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-
-                        }
-                    }
-
                     HttpUtil.doPost(mUrl + POWER_OFF, "deviceId="+device.getDeviceId()+"&");
-
-                    mLastPostMills = System.currentTimeMillis();
 
 
                 }
             }
-        }).start();
+        };
+
+        synchronized (mTaskQueue) {
+
+            mTaskQueue.addLast(task);
+        }
 
     }
 
@@ -167,7 +186,6 @@ public class MainPresenter implements Presenter<MainView> {
     public void searchDevice(){
 
         mView.showSearching();
-
 
         new Thread(new Runnable() {
             @Override
@@ -179,57 +197,15 @@ public class MainPresenter implements Presenter<MainView> {
 
                     mUrl = "http://"+serverIP+":"+PORT+"/";
 
-                    try {
+                    IoTUtils.sleep(500);
 
-                        Thread.sleep(1000);
+                    //同步定时任务
+                    initTask();
 
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    IoTUtils.sleep(500);
 
-                    long intervalStartWeek = IoTUtils.getIntervalStartWeek();
-
-                    int dayOfWeek = IoTUtils.getDayOfWeek();
-
-                    String response = HttpUtil.doPost(mUrl+"listDevices/",
-                            "interval="+intervalStartWeek+"&dayOfWeek="+dayOfWeek);
-
-                    String[] devicesInfo;
-
-                    if(response.contains(";")){
-
-                        devicesInfo = response.split(";");
-
-                        for(String info:devicesInfo){
-
-                            int deviceID = Integer.parseInt(info.substring(0,info.indexOf(":")));
-                            String state = info.substring(info.indexOf(":")+1);
-                            boolean deviceState = state.equals("0")?true:false;
-
-                            List<Device> deviceList = Device.findWithQuery(Device.class,"select * from DEVICE where DEVICE_ID="+deviceID);
-
-                            if(deviceList==null || deviceList.size()==0){
-
-                                Device device = new Device(deviceID,
-                                        null,deviceState);
-                                device.save();
-
-                            }else {
-
-                               Device device = deviceList.get(0);
-
-                                device.setDeviceState(deviceState);
-
-                                device.update();
-                            }
-
-                        }
-
-                    }
-
-
-                    mDeviceList = Device.listAll(Device.class);
-
+                    //更新设备状态
+                    updateDeviceState();
 
                     mHandler.obtainMessage(SHOW_PANEL).sendToTarget();
 
@@ -239,6 +215,34 @@ public class MainPresenter implements Presenter<MainView> {
                 }
             }
         }).start();
+    }
+
+    public void initTask(){
+
+        StringBuilder builder = new StringBuilder();
+
+        int week = IoTUtils.getDayOfWeek();
+        Date date = new Date(System.currentTimeMillis());
+
+        builder.append("week="+week+"&hour="+date.getHours()+"&minute="+
+                date.getMinutes()+"&\n");
+
+        List<TimeTask> tasks = TimeTask.listAll(TimeTask.class);
+
+        if(tasks!=null && tasks.size()>0){
+
+            for(TimeTask task : tasks){
+
+                builder.append("taskId="+task.getTaskId()+"&deviceId="+task.getDeviceId()+
+                        "&hour="+task.getHour()+"&minute="+task.getMinute()+"&state="+
+                        task.getSwitchState()+"&days="+task.getActivatedDays()+"\n");
+
+            }
+        }
+
+        String args = builder.toString();
+
+        HttpUtil.doPost(mUrl+"initTask",args);
     }
 
     public String scanDeviceServer(){
@@ -292,42 +296,37 @@ public class MainPresenter implements Presenter<MainView> {
 
     public void cancelTimer(final TimeTask timeTask){
 
-        new Thread(new Runnable() {
+        Runnable task = new Runnable() {
             @Override
             public void run() {
 
                 if (mUrl != null) {
 
-                    HttpUtil.doPost(mUrl, "cancelTimer:"+timeTask.getTimerId()+"&");
+                    HttpUtil.doPost(mUrl, "cancelTimer&taskId="+timeTask.getTaskId()+"&");
 
                 }
 
             }
-        }).start();
+        };
+
+        synchronized (mTaskQueue) {
+
+            mTaskQueue.addLast(task);
+        }
 
     }
 
     public void setTimer(final TimeTask timeTask){
 
-        new Thread(new Runnable() {
+       Runnable task = new Runnable() {
             @Override
             public void run() {
 
                 if (mUrl != null) {
 
-                    String response = HttpUtil.doPost(mUrl, "deviceId="+timeTask.getDeviceId()+"&time="+
-                            timeTask.getInterval()+"&dayofweek="+ IoTUtils.getDayOfWeek()+
-                            "&days="+timeTask.getActivatedDayStr()+"&state="+timeTask.getSwitchState());
+                    String response = HttpUtil.doPost(mUrl+"setTimer",timeTask.getPostString());
 
-                    if(!TextUtils.isEmpty(response) && response.contains("timerId=")){
-
-                        String[] info = response.split("=");
-
-                        int timerId = Integer.parseInt(info[1]);
-
-                        timeTask.setTimerId(timerId);
-
-                        timeTask.update();
+                    if(!TextUtils.isEmpty(response) && response.contains("setTimer=OK")){
 
                         mHandler.obtainMessage(UPDATE_TIMER_TASK).sendToTarget();
                     }
@@ -335,63 +334,55 @@ public class MainPresenter implements Presenter<MainView> {
                 }
 
             }
-        }).start();
+        };
+
+        synchronized (mTaskQueue) {
+
+            mTaskQueue.addLast(task);
+        }
 
     }
 
-    public void updateDeviceState(){
+    public void updateDeviceState() {
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+        String response = HttpUtil.doPost(mUrl + "listDevices", "");
 
-                long intervalStartWeek = IoTUtils.getIntervalStartWeek();
+        String[] devicesInfo;
 
-                int dayOfWeek = IoTUtils.getDayOfWeek();
+        if (response.contains(";")) {
 
-                String response = HttpUtil.doPost(mUrl+"listDevices",
-                        "interval="+intervalStartWeek+"&dayOfWeek="+dayOfWeek);
+            devicesInfo = response.split(";");
 
-                String[] devicesInfo;
+            for (String info : devicesInfo) {
 
-                if(response.contains(";")){
+                int deviceID = Integer.parseInt(info.substring(0, info.indexOf(":")));
+                String state = info.substring(info.indexOf(":") + 1);
+                boolean deviceState = state.equals("0") ? true : false;
 
-                    devicesInfo = response.split(";");
+                List<Device> deviceList = Device.findWithQuery(Device.class, "select * from DEVICE where DEVICE_ID=" + deviceID);
 
-                    for(String info:devicesInfo){
+                if (deviceList == null) {
 
-                        int deviceID = Integer.parseInt(info.substring(0,info.indexOf(":")));
-                        String state = info.substring(info.indexOf(":")+1);
-                        boolean deviceState = state.equals("0")?true:false;
+                    Device device = new Device(deviceID,
+                            null, deviceState);
+                    device.save();
 
-                        List<Device> deviceList = Device.findWithQuery(Device.class,"select * from DEVICE where DEVICE_ID="+deviceID);
+                } else if (deviceList.size() > 0) {
 
-                        if(deviceList==null){
+                    Device device = deviceList.get(0);
 
-                            Device device = new Device(deviceID,
-                                    null,deviceState);
-                            device.save();
+                    device.setDeviceState(deviceState);
 
-                        }else {
-
-                            Device device = deviceList.get(0);
-
-                            device.setDeviceState(deviceState);
-
-                            device.update();
-                        }
-
-                    }
-
+                    device.update();
                 }
 
-                mDeviceList = Device.listAll(Device.class);
-
-                mHandler.obtainMessage(UPDATE_DEVICE_STATE).sendToTarget();
-
-
             }
-        }).start();
+
+        }
+
+        mDeviceList = Device.listAll(Device.class);
+
+        mHandler.obtainMessage(UPDATE_DEVICE_STATE).sendToTarget();
 
 
     }

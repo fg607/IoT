@@ -15,7 +15,6 @@ public class TimeTask extends SugarRecord{
     @Unique
     long taskId;
     int deviceId;
-    int timerId;
     String deviceName;
     int hour;
     int minute;
@@ -66,14 +65,6 @@ public class TimeTask extends SugarRecord{
     public void setDeviceId(int deviceId){
 
         this.deviceId = deviceId;
-    }
-
-    public int getTimerId() {
-        return timerId;
-    }
-
-    public void setTimerId(int timerId) {
-        this.timerId = timerId;
     }
 
     public String getDeviceName(){
@@ -197,5 +188,12 @@ public class TimeTask extends SugarRecord{
                 ", switchState=" + switchState +
                 ", activated=" + activated +
                 '}';
+    }
+
+    public String getPostString(){
+
+        return "taskId="+taskId+"&deviceId="+getDeviceId()+"&hour="+hour+
+                "&minute="+minute+"&interval="+getInterval()+
+                "&days="+ getActivatedDayStr()+"&state="+getSwitchState();
     }
 }

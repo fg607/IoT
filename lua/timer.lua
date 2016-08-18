@@ -83,21 +83,6 @@ function timer.stop()
     ttbl = rmEntry(ttbl, function (v) return v ~= nil end)
 end
 
-function timer.set(tid)
-    if (tid ~= timer.id) then
-        timer.stop()
-        timer.id = tid
-        timer.start()
-    end
-end
-
-function timer.setImmediate(fn, ...)
-    local tobj = { delay = 0, f = fn, rp = 0, argus = {...} }
-    table.insert(_exequeImmed, tobj)
-    if (timer.enable == false) then timer.start() end
-    return tobj
-end
-
 function timer.setTimeout(fn, delay, ...)
     local tobj = { delay = delay, f = fn, rp = 0, argus = {...} }
     if (delay <= tick or delay > 2147483646) then
@@ -109,6 +94,7 @@ function timer.setTimeout(fn, delay, ...)
     if (timer.enable == false) then timer.start() end
     return tobj
 end
+
 
 function timer.setInterval(fn, delay, ...)
     local tobj = timer.setTimeout(fn, delay, ...)
@@ -124,10 +110,6 @@ function timer.setDailyAlarm(fn, delay, ...)
     return tobj
 end
 
-function timer.clearImmediate(tobj)
-    _exequeImmed = rmEntry(_exequeImmed, tobj)
-    exequeImmed = rmEntry(exequeImmed, tobj)
-end
 
 function timer.clearTimeout(tobj)
     rmEntry(exeque, tobj)
