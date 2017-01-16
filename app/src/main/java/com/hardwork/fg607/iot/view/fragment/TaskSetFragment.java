@@ -2,6 +2,7 @@ package com.hardwork.fg607.iot.view.fragment;
 
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;

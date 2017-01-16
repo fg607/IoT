@@ -361,7 +361,7 @@ public class MainPresenter implements Presenter<MainView> {
 
                 List<Device> deviceList = Device.findWithQuery(Device.class, "select * from DEVICE where DEVICE_ID=" + deviceID);
 
-                if (deviceList == null) {
+                if (deviceList == null || deviceList.size() == 0) {
 
                     Device device = new Device(deviceID,
                             null, deviceState);

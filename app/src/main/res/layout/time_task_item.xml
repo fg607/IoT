@@ -30,12 +30,22 @@
        android:text="12:45下午"/>
 
     <TextView
+        android:id="@+id/state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/time"
+        android:layout_marginLeft="10dp"
+        android:textSize="16sp"
+        android:textColor="@color/black" />
+
+    <TextView
         android:id="@+id/valiad_day"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/time"
+        android:layout_toRightOf="@id/state"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="20dp"
         android:textSize="16sp"
         android:textColor="@color/green"
         android:text="日一二三四五六"/>
@@ -48,15 +58,6 @@
         android:clickable="true"
         android:layout_alignParentRight="true"/>
 
-    <TextView
-        android:id="@+id/state"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toLeftOf="@id/switcher"
-        android:layout_marginRight="10dp"
-        android:textSize="16sp"
-        android:textColor="@color/black" />
 
 
 
