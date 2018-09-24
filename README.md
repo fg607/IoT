@@ -1,4 +1,4 @@
-#NodeMCU智能插排wifi控制APP 
+# NodeMCU智能插排wifi控制APP 
 
 - 使用NodeMCU芯片控制插排,通过wifi实现对家用电器的智能控制.
 
